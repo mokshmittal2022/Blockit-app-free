@@ -14,6 +14,7 @@ import { RoutinesScreen } from './components/screens/RoutinesScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
 import { CodeExplorerScreen } from './components/screens/CodeExplorerScreen';
 import { AccessibilityDisclosureModal } from './components/modals/AccessibilityDisclosureModal';
+import { ApkDownloadModal } from './components/modals/ApkDownloadModal';
 import {
   AppTab,
   FocusSession,
@@ -42,6 +43,7 @@ export default function App() {
   const [sessionsHistory, setSessionsHistory] = useState<FocusSession[]>(getStoredSessionsHistory());
   const [allowedApps, setAllowedApps] = useState<EssentialApp[]>(DEFAULT_ESSENTIAL_APPS);
   const [isAccessibilityModalOpen, setIsAccessibilityModalOpen] = useState(false);
+  const [isApkModalOpen, setIsApkModalOpen] = useState(false);
 
   // Synchronize haptics
   useEffect(() => {
@@ -180,6 +182,7 @@ export default function App() {
         triggerHapticTick(1400);
         setCurrentTab((prev) => (prev === 'code' ? 'focus' : 'code'));
       }}
+      onOpenApkModal={() => setIsApkModalOpen(true)}
     >
       {/* If Active Session is running, render Fullscreen Lock Screen */}
       {activeSession ? (
@@ -240,6 +243,7 @@ export default function App() {
                 onRequestAccessibilityDisclosure={() =>
                   setIsAccessibilityModalOpen(true)
                 }
+                onOpenApkModal={() => setIsApkModalOpen(true)}
               />
             )}
 
@@ -264,6 +268,12 @@ export default function App() {
           setIsAccessibilityModalOpen(false);
         }}
         onDismiss={() => setIsAccessibilityModalOpen(false)}
+      />
+
+      {/* Android APK Download & Installation Modal */}
+      <ApkDownloadModal
+        isOpen={isApkModalOpen}
+        onClose={() => setIsApkModalOpen(false)}
       />
     </PhoneFrame>
   );

@@ -153,6 +153,16 @@ fun Context.showToast(message: String) {
             <span>Add File Manually</span>
           </button>
 
+          {/* Download APK Button */}
+          <a
+            href="/stillhour-v1.0.0.apk"
+            download="stillhour-v1.0.0.apk"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold font-body active:scale-95 transition-all text-xs shadow-sm"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Download APK</span>
+          </a>
+
           {/* Download Project ZIP */}
           <button
             onClick={handleDownloadZip}

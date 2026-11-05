@@ -12,7 +12,9 @@ import {
   Cloud,
   Lock,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  Smartphone,
+  Download
 } from 'lucide-react';
 import { ThemeMode, UserSettings } from '../../types';
 import { triggerHapticTick, triggerHeavyHaptic } from '../../services/haptics';
@@ -21,12 +23,14 @@ interface Props {
   settings: UserSettings;
   onUpdateSettings: (newSettings: Partial<UserSettings>) => void;
   onRequestAccessibilityDisclosure: () => void;
+  onOpenApkModal?: () => void;
 }
 
 export const SettingsScreen: React.FC<Props> = ({
   settings,
   onUpdateSettings,
-  onRequestAccessibilityDisclosure
+  onRequestAccessibilityDisclosure,
+  onOpenApkModal
 }) => {
   const [showPassModal, setShowPassModal] = useState(false);
   const [cloudSynced, setCloudSynced] = useState(false);
@@ -230,6 +234,35 @@ export const SettingsScreen: React.FC<Props> = ({
             </div>
           </div>
           <span className="text-xs font-bold text-[#1FB5A8]">Refill</span>
+        </div>
+
+        {/* Android APK Download Card */}
+        <div
+          onClick={() => {
+            triggerHapticTick(1400);
+            if (onOpenApkModal) onOpenApkModal();
+          }}
+          className="bg-white dark:bg-[#16253B] rounded-[24px] p-4.5 border border-emerald-500/30 dark:border-emerald-500/30 shadow-sm flex items-center justify-between cursor-pointer hover:border-emerald-500/60 transition-all active:scale-98"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <Smartphone className="w-5 h-5 stroke-[2.5]" />
+            </div>
+            <div>
+              <h4 className="font-heading font-bold text-xs text-slate-900 dark:text-white flex items-center gap-2">
+                Download Android APK
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                  v1.0.0
+                </span>
+              </h4>
+              <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-0.5">
+                Install directly on your phone or test with Android Studio
+              </p>
+            </div>
+          </div>
+          <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+            <Download className="w-4 h-4" />
+          </div>
         </div>
 
         {/* Cloud Backup & Privacy */}

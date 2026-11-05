@@ -7,6 +7,7 @@ interface Props {
   isLockActive: boolean;
   onToggleCodeView?: () => void;
   isCodeViewActive?: boolean;
+  onOpenApkModal?: () => void;
 }
 
 export const PhoneFrame: React.FC<Props> = ({
@@ -14,7 +15,8 @@ export const PhoneFrame: React.FC<Props> = ({
   themeMode,
   isLockActive,
   onToggleCodeView,
-  isCodeViewActive = false
+  isCodeViewActive = false,
+  onOpenApkModal
 }) => {
   const [deviceMode, setDeviceMode] = useState<'phone' | 'tablet' | 'fullscreen'>('phone');
   const [currentTime, setCurrentTime] = useState('08:53');
@@ -90,6 +92,17 @@ export const PhoneFrame: React.FC<Props> = ({
           </button>
 
           <div className="w-[1px] h-4 bg-slate-300 dark:bg-slate-700 mx-0.5" />
+
+          {onOpenApkModal && (
+            <button
+              onClick={onOpenApkModal}
+              className="px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm active:scale-95"
+              title="Download Android APK (v1.0.0)"
+            >
+              <Smartphone className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>Download APK</span>
+            </button>
+          )}
 
           {onToggleCodeView && (
             <button
