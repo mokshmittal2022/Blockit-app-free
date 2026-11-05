@@ -1,0 +1,6 @@
+{
+  "name": "Stillhour",
+  "description": "Tactile focus-lock app blocking distractions with custom sessions, emergency passes, routines, and streak skyline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

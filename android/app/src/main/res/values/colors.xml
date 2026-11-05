@@ -1,0 +1,13 @@
+<resources>
+    <!-- Stillhour Brand Palette -->
+    <color name="navy_dark">#0F1B2D</color>
+    <color name="navy_surface">#16253B</color>
+    <color name="navy_surface_variant">#1E324E</color>
+    <color name="off_white">#F4F6F8</color>
+    <color name="off_white_surface">#FFFFFF</color>
+    <color name="accent_teal">#1FB5A8</color>
+    <color name="accent_amber">#F2B84B</color>
+    <color name="danger_coral">#E5584F</color>
+    <color name="text_primary_dark">#F1F5F9</color>
+    <color name="text_secondary_dark">#94A3B8</color>
+</resources>

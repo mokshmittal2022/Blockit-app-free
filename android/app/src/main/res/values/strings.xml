@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Stillhour</string>
+    <string name="accessibility_service_label">Stillhour Focus Shield</string>
+    <string name="accessibility_service_description">Stillhour uses this service solely to observe which app is currently open while a focus session is actively running. If a distracting app is opened, Stillhour brings you back to your focus session. No screen text, keystrokes, personal data, or usage logs are ever read, inspected, or transmitted.</string>
+    <string name="notification_channel_name">Focus Sessions</string>
+    <string name="notification_channel_desc">Shows ongoing active session progress and low-priority countdown</string>
+    <string name="notification_routine_channel">Scheduled Routines</string>
+    <string name="notification_routine_desc">Advance heads-up notifications before scheduled focus sessions</string>
+</resources>
