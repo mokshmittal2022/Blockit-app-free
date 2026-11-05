@@ -14,6 +14,7 @@ interface Props {
   onToggleAllowedApp: (appId: string) => void;
   onStartSession: (minutes: number) => void;
   onOpenSkyline: () => void;
+  onAddCustomApp?: (name: string, packageName: string) => void;
 }
 
 export const FocusScreen: React.FC<Props> = ({
@@ -23,7 +24,8 @@ export const FocusScreen: React.FC<Props> = ({
   allowedAppIds,
   onToggleAllowedApp,
   onStartSession,
-  onOpenSkyline
+  onOpenSkyline,
+  onAddCustomApp
 }) => {
   const [selectedMinutes, setSelectedMinutes] = useState(25);
   const [isAllowedModalOpen, setIsAllowedModalOpen] = useState(false);
@@ -197,6 +199,7 @@ export const FocusScreen: React.FC<Props> = ({
         allowedAppIds={allowedAppIds}
         onToggleApp={onToggleAllowedApp}
         onClose={() => setIsAllowedModalOpen(false)}
+        onAddCustomApp={onAddCustomApp}
       />
 
       {/* Custom Time Input Prompt */}

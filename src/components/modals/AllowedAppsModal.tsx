@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Phone, MapPin, MessageSquare, Mail, Music, Calculator, FileText, Check, X, ShieldAlert } from 'lucide-react';
 import { EssentialApp } from '../../types';
 import { triggerHapticTick } from '../../services/haptics';
@@ -9,6 +9,7 @@ interface Props {
   allowedAppIds: string[];
   onToggleApp: (appId: string) => void;
   onClose: () => void;
+  onAddCustomApp?: (name: string, packageName: string) => void;
 }
 
 export const AllowedAppsModal: React.FC<Props> = ({
@@ -16,8 +17,13 @@ export const AllowedAppsModal: React.FC<Props> = ({
   apps,
   allowedAppIds,
   onToggleApp,
-  onClose
+  onClose,
+  onAddCustomApp
 }) => {
+  const [isAddingCustom, setIsAddingCustom] = useState(false);
+  const [customName, setCustomName] = useState('');
+  const [customPackage, setCustomPackage] = useState('');
+
   if (!isOpen) return null;
 
   const renderIcon = (iconName: string) => {
@@ -112,9 +118,60 @@ export const AllowedAppsModal: React.FC<Props> = ({
           })}
         </div>
 
+        {/* Add Package Manually Accordion / Button */}
+        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-[#243B5A]">
+          {isAddingCustom ? (
+            <div className="space-y-2 p-2 bg-slate-50 dark:bg-[#0F1B2D] rounded-xl border border-slate-200 dark:border-[#243B5A]">
+              <input
+                type="text"
+                placeholder="App Name (e.g. WhatsApp)"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#16253B] border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Package Name (e.g. com.whatsapp)"
+                value={customPackage}
+                onChange={(e) => setCustomPackage(e.target.value)}
+                className="w-full text-xs font-mono px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#16253B] border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white outline-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsAddingCustom(false)}
+                  className="flex-1 py-1 text-xs text-slate-500 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (!customName.trim() || !customPackage.trim()) return;
+                    if (onAddCustomApp) {
+                      onAddCustomApp(customName.trim(), customPackage.trim());
+                    }
+                    setCustomName('');
+                    setCustomPackage('');
+                    setIsAddingCustom(false);
+                  }}
+                  className="flex-1 py-1 text-xs font-bold bg-[#1FB5A8] text-white rounded-lg shadow-sm"
+                >
+                  Add App
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsAddingCustom(true)}
+              className="w-full py-2 text-xs font-bold text-[#1FB5A8] hover:bg-teal-500/10 rounded-xl transition-colors flex items-center justify-center gap-1.5"
+            >
+              + Add App Package Manually
+            </button>
+          )}
+        </div>
+
         <button
           onClick={onClose}
-          className="mt-4 w-full py-3 bg-[#1FB5A8] hover:bg-[#1aa195] text-white font-bold text-xs rounded-xl shadow-md active:scale-98 transition-all"
+          className="mt-3 w-full py-3 bg-[#1FB5A8] hover:bg-[#1aa195] text-white font-bold text-xs rounded-xl shadow-md active:scale-98 transition-all"
         >
           Done
         </button>

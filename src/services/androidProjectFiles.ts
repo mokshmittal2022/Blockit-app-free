@@ -1,7 +1,90 @@
 import JSZip from 'jszip';
 import { AndroidFileRecord } from '../types';
 
-export const ANDROID_PROJECT_FILES: AndroidFileRecord[] = [
+const STORAGE_CUSTOM_FILES_KEY = 'stillhour_custom_android_files';
+
+export const BASE_ANDROID_PROJECT_FILES: AndroidFileRecord[] = [
+  {
+    path: 'gradle/libs.versions.toml',
+    name: 'libs.versions.toml',
+    language: 'toml',
+    category: 'gradle',
+    content: `[versions]
+agp = "8.7.2"
+kotlin = "2.0.21"
+coreKtx = "1.15.0"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+composeBom = "2024.10.00"
+room = "2.6.1"
+datastore = "1.1.1"
+work = "2.9.1"
+coroutines = "1.8.1"
+navigationCompose = "2.8.3"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }`
+  },
+  {
+    path: 'gradle.properties',
+    name: 'gradle.properties',
+    language: 'properties',
+    category: 'gradle',
+    content: `org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+android.nonTransitiveRClass=true
+kotlin.code.style=official`
+  },
+  {
+    path: 'gradle/wrapper/gradle-wrapper.properties',
+    name: 'gradle-wrapper.properties',
+    language: 'properties',
+    category: 'gradle',
+    content: `distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists`
+  },
+  {
+    path: 'app/proguard-rules.pro',
+    name: 'proguard-rules.pro',
+    language: 'pro',
+    category: 'gradle',
+    content: `-keepattributes *Annotation*
+-keepclassmembers class * {
+    @androidx.room.Dao *;
+    @androidx.room.Database *;
+    @androidx.room.Entity *;
+}
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}`
+  },
   {
     path: 'app/src/main/AndroidManifest.xml',
     name: 'AndroidManifest.xml',
@@ -11,7 +94,6 @@ export const ANDROID_PROJECT_FILES: AndroidFileRecord[] = [
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
@@ -54,7 +136,6 @@ export const ANDROID_PROJECT_FILES: AndroidFileRecord[] = [
             android:exported="false"
             android:foregroundServiceType="specialUse" />
 
-        <!-- Accessibility Service to detect foreground package and redirect unauthorized apps -->
         <service
             android:name=".service.FocusLockAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
@@ -138,15 +219,10 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
-    // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
-
-    // DataStore Preferences
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-
-    // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 }`
   },
@@ -166,15 +242,6 @@ import com.stillhour.app.ui.screens.ActiveSessionActivity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 
-/**
- * FocusLockAccessibilityService
- *
- * CRITICAL SAFETY & PRIVACY GUARANTEE:
- * 1. ONLY inspects the event's packageName when a session is active.
- * 2. NEVER reads screen content, UI text, keystrokes, or accessibility nodes.
- * 3. Does NOTHING when no focus session is active.
- * 4. Emergency dialer and telecom system packages are hard-whitelisted and NEVER blocked.
- */
 class FocusLockAccessibilityService : AccessibilityService() {
 
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -195,8 +262,6 @@ class FocusLockAccessibilityService : AccessibilityService() {
         serviceScope.launch {
             val app = application as? StillhourApp ?: return@launch
             val activeEndTime = app.settingsRepository.activeSessionEndTimeFlow.first()
-
-            // Do nothing if no session is running!
             if (activeEndTime == null || System.currentTimeMillis() >= activeEndTime) return@launch
 
             val allowedPackages = app.settingsRepository.allowedPackagesFlow.first()
@@ -213,6 +278,35 @@ class FocusLockAccessibilityService : AccessibilityService() {
     }
 
     override fun onInterrupt() {}
+}`
+  },
+  {
+    path: 'app/src/main/java/com/stillhour/app/service/FocusForegroundService.kt',
+    name: 'FocusForegroundService.kt',
+    language: 'kotlin',
+    category: 'service',
+    content: `package com.stillhour.app.service
+
+import android.app.*
+import android.content.Context
+import android.content.Intent
+import android.os.IBinder
+import androidx.core.app.NotificationCompat
+import com.stillhour.app.StillhourApp
+
+class FocusForegroundService : Service() {
+    companion object {
+        const val NOTIFICATION_ID = 1001
+        fun start(context: Context, endTime: Long, targetMin: Int, sessionId: Long) {
+            val intent = Intent(context, FocusForegroundService::class.java).apply {
+                putExtra("END_TIME", endTime)
+                putExtra("TARGET_MIN", targetMin)
+                putExtra("SESSION_ID", sessionId)
+            }
+            context.startForegroundService(intent)
+        }
+    }
+    override fun onBind(intent: Intent?): IBinder? = null
 }`
   },
   {
@@ -306,14 +400,11 @@ data class RoutineEntity(
 import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stillhour.app.service.FocusForegroundService
@@ -326,14 +417,12 @@ import com.stillhour.app.ui.viewmodel.FocusViewModel
 fun FocusScreen(viewModel: FocusViewModel) {
     val context = LocalContext.current
     val selectedMinutes by viewModel.selectedMinutes.collectAsStateWithLifecycle()
-    val emergencyPasses by viewModel.emergencyPasses.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Large Tabular Timer Card
         Card(shape = RoundedCornerShape(24.dp)) {
             Text(
                 text = String.format("%02d:%02d", selectedMinutes / 60, selectedMinutes % 60),
@@ -342,13 +431,11 @@ fun FocusScreen(viewModel: FocusViewModel) {
             )
         }
 
-        // Rotary Wheel & Presets Grid
         DurationWheelPicker(
             currentMinutes = selectedMinutes,
             onMinutesChanged = { viewModel.setCustomMinutes(it) }
         )
 
-        // Slide To Start
         SlideToConfirm(
             text = "SLIDE TO START",
             onConfirmed = {
@@ -362,45 +449,6 @@ fun FocusScreen(viewModel: FocusViewModel) {
 }`
   },
   {
-    path: 'app/src/main/java/com/stillhour/app/ui/screens/ActiveSessionScreen.kt',
-    name: 'ActiveSessionScreen.kt',
-    language: 'kotlin',
-    category: 'compose',
-    content: `package com.stillhour.app.ui.screens
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.stillhour.app.ui.components.SlideToConfirm
-import com.stillhour.app.ui.theme.NavyDark
-import com.stillhour.app.ui.viewmodel.ActiveSessionViewModel
-
-@Composable
-fun ActiveSessionScreen(viewModel: ActiveSessionViewModel, onSessionFinished: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize().background(NavyDark).padding(20.dp)) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Large Countdown digits
-            // Seconds Tile & +15 min extension tile
-            // Ends at tile & Ambient sound tile
-            // Slide to exit with Emergency Pass
-            // Allowed essentials dock (Phone, Maps, Messages)
-        }
-    }
-}`
-  },
-  {
     path: 'app/src/main/java/com/stillhour/app/ui/components/SkylineCanvas.kt',
     name: 'SkylineCanvas.kt',
     language: 'kotlin',
@@ -409,7 +457,6 @@ fun ActiveSessionScreen(viewModel: ActiveSessionViewModel, onSessionFinished: ()
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -420,7 +467,6 @@ import com.stillhour.app.ui.theme.AccentTeal
 @Composable
 fun SkylineCanvas(streakDays: Int, modifier: Modifier = Modifier) {
     Canvas(modifier = modifier.fillMaxSize()) {
-        // Geometric Canvas-drawn skyscraper tower where each day adds a building floor
         val columns = 8
         val rows = 12
         val cellW = (size.width - 40f) / columns
@@ -442,10 +488,49 @@ fun SkylineCanvas(streakDays: Int, modifier: Modifier = Modifier) {
   }
 ];
 
-export async function downloadAndroidProjectZip() {
+export function getCustomFiles(): AndroidFileRecord[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_CUSTOM_FILES_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+export function saveCustomFile(file: AndroidFileRecord) {
+  try {
+    const custom = getCustomFiles();
+    const idx = custom.findIndex((f) => f.path === file.path);
+    if (idx >= 0) {
+      custom[idx] = file;
+    } else {
+      custom.push(file);
+    }
+    localStorage.setItem(STORAGE_CUSTOM_FILES_KEY, JSON.stringify(custom));
+  } catch {}
+}
+
+export function deleteCustomFile(path: string) {
+  try {
+    const custom = getCustomFiles().filter((f) => f.path !== path);
+    localStorage.setItem(STORAGE_CUSTOM_FILES_KEY, JSON.stringify(custom));
+  } catch {}
+}
+
+export function getAllProjectFiles(): AndroidFileRecord[] {
+  const custom = getCustomFiles();
+  const baseMap = new Map<string, AndroidFileRecord>();
+  for (const f of BASE_ANDROID_PROJECT_FILES) {
+    baseMap.set(f.path, f);
+  }
+  for (const c of custom) {
+    baseMap.set(c.path, c);
+  }
+  return Array.from(baseMap.values());
+}
+
+export async function downloadAndroidProjectZip(filesToZip?: AndroidFileRecord[]) {
   const zip = new JSZip();
 
-  // Root files
   zip.file('settings.gradle.kts', `pluginManagement {
     repositories {
         google()
@@ -471,8 +556,8 @@ include(":app")
 }
 `);
 
-  // App files
-  for (const file of ANDROID_PROJECT_FILES) {
+  const files = filesToZip || getAllProjectFiles();
+  for (const file of files) {
     zip.file(file.path, file.content);
   }
 

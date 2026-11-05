@@ -141,6 +141,22 @@ export default function App() {
     });
   };
 
+  const handleAddCustomApp = (name: string, packageName: string) => {
+    const id = `custom-${Date.now()}`;
+    const newApp: EssentialApp = {
+      id,
+      name,
+      packageName,
+      icon: 'Shield',
+      isAllowed: true
+    };
+    setAllowedApps((prev) => [...prev, newApp]);
+    setSettings((prev) => ({
+      ...prev,
+      allowedAppIds: [...prev.allowedAppIds, id]
+    }));
+  };
+
   const handleToggleRoutine = (id: string) => {
     setRoutines((prev) =>
       prev.map((r) => (r.id === id ? { ...r, isEnabled: !r.isEnabled } : r))
@@ -186,6 +202,7 @@ export default function App() {
                 allowedApps={allowedApps}
                 allowedAppIds={settings.allowedAppIds}
                 onToggleAllowedApp={handleToggleAllowedApp}
+                onAddCustomApp={handleAddCustomApp}
                 onStartSession={handleStartSession}
                 onOpenSkyline={() => setCurrentTab('skyline')}
               />
